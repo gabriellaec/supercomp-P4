@@ -71,115 +71,53 @@ int main() {
 // ----- Obtendo o score e as sequências alinhadas ----- //
     
     item melhor, sw_atual;    
-    vector<item> combinations;
-    // combinations.reserve((int)(a.size()*b.size()));
-   
+    vector<item> combinations;   
     int i=0;
-
-    // cout << "size a: " << subseqs_a.size() << endl;
-    // #pragma omp parallel for// collapse(2)
     for (auto& sub_a : subseqs_a){
         for (auto& sub_b : subseqs_b){
-            
             combinations.push_back({i,sub_a, sub_b});
             i+=1;
         }
     }
-//  cout<< "-----------------------\n";
-//  cout<< i<< endl;
-//     cout<<combinations.size()<< endl;
-//     for (auto& el : combinations){
-//         cout << el.item_score<< "    " ;
-//         for (auto& el2 : el.seq_b) cout << el2;
-//         cout<< endl;
-//     }
 
-
-    vector<item> resultados((int)combinations.size());//[(int)combinations.size()];
-    // resultados.reserve((int)combinations.size());
-
-    // resultados[0]={0,a,b};
-    // cout<< "-------------------\n";
-    // for (auto& el : resultados) cout << el.item_score << endl;
-    int nthreads=0;
-    #pragma omp parallel for shared(resultados) //reduction(max:resultados)
+    vector<item> resultados((int)combinations.size());
+    #pragma omp parallel for shared(resultados) 
     for (auto& el : combinations){
-        //     nthreads = omp_get_num_threads();
-        //     cout << nthreads << endl;
-        //     cout<< "--------------------------\n";
-        // cout << omp_get_thread_num()<< endl;
-        //  cout<< i<< endl;
-
-        // #pragma omp critical 
-        // {
-        // // cout << el.item_score<< "    " ;
-        // // for (auto& el2 : el.seq_a) cout << el2;
-        // // cout<< "    " ;
-        // // for (auto& el2 : el.seq_b) cout << el2;
-        // // cout<< endl;
-
-        
-
-        
-        // }
         resultados[el.item_score] = smith_waterman(el.seq_a, el.seq_b);
-
-        // cout << smith_waterman(el.seq_a, el.seq_b).item_score << endl;
-        
-        
-        
     }
 
-    // cout << "============\n";
-    // for (auto& el : resultados){ 
-    //     cout << el.item_score << endl;
-    // }cout << "============\n";
-
-// #pragma// #pragma omp critical 
-        // {
-            // resultados.push_back(smith_waterman(get<0>(el), get<1>(el))); 
-        // }
-        // cout << "--------------------\n";
-        // cout<< resultados.size() << endl;
-        // for (auto& el : resultados){
-        //     cout<< el.item_score << endl;
-        // }
     int melhor_valor=-1;
-    // #pragma omp parallel// reduction(max:m)
     for (int i=0; i<(int)resultados.size(); i++){
         if (resultados[i].item_score > melhor_valor){
             melhor_valor = resultados[i].item_score;
             melhor = resultados[i];
         }
-
-        // m = resultados[i].item_score>m ? resultados[i].item_score:m; 
-
      }
 
     
 
 // ----- Imprimindo Score obtido ----- //
-    // cout << "----- Score -----" << endl;
-    // cout << "max_score: "<< melhor.item_score << endl << endl;
+    cout << "----- Score -----" << endl;
+    cout << "max_score: "<< melhor.item_score << endl << endl;
 
-    // cout << " ----- Melhor subsequência de A -----" << endl;
-    // for (auto& el : melhor.seq_a ){
-    //     cout << el << " ";
-    // }
-    // cout << endl;
+    cout << " ----- Melhor subsequência de A -----" << endl;
+    for (auto& el : melhor.seq_a ){
+        cout << el << " ";
+    }
+    cout << endl;
 
-    // cout << " ----- Subsequência B correspondente -----" << endl;
-    // for (auto& el : melhor.seq_b){
-    //     cout << el << " ";
-    // }
-    // cout << endl;
+    cout << " ----- Subsequência B correspondente -----" << endl;
+    for (auto& el : melhor.seq_b){
+        cout << el << " ";
+    }
+    cout << endl;
 
 
 
-    // final_time = omp_get_wtime() - init_time;
-    // cout << "tempo: " << final_time << endl;
+    final_time = omp_get_wtime() - init_time;
+    cout << "tempo: " << final_time << endl;
 
-    cout << melhor.item_score ;
+    // cout << melhor.item_score ;
 
      return 0;
 
