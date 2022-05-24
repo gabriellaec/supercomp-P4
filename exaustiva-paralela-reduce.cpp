@@ -93,6 +93,7 @@ int main() {
     long i=0;
     int melhor_valor = -1;
     int melhor_valor_g = -1;
+    int val;
     for (auto& sub_a : subseqs_a){
         for (auto& sub_b : subseqs_b){
             combinations.push_back({i,sub_a, sub_b});
@@ -100,9 +101,11 @@ int main() {
             if (i>=600000){ // divisão em sub blocos para não estourar o vetor
                 #pragma omp parallel for reduction(max:melhor_valor)
                 for (auto& el : combinations){ 
-                    melhor_valor = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
-                }         
-                for (long i=0; i<(long)resultados.size(); i++){
+                    val = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
+                    if (val>melhor_valor)melhor_valor=val;
+                } 
+
+                for (int i=0; i<(int)resultados.size(); i++){
                     if (melhor_valor > melhor_valor_g){
                         melhor_valor_g = melhor_valor;
                     }
@@ -117,11 +120,13 @@ int main() {
 // Calculando o score para os valores restantes
     #pragma omp parallel for reduction(max:melhor_valor)
     for (auto& el : combinations){ 
-            melhor_valor = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
+            val = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
+            if (val>melhor_valor)melhor_valor=val;
+            
     }
+    
         
-        
-    for (long i=0; i<(long)resultados.size(); i++){
+    for (int i=0; i<(int)resultados.size(); i++){
         if (melhor_valor > melhor_valor_g){
             melhor_valor_g = melhor_valor;
         }
@@ -133,6 +138,8 @@ int main() {
     cout << "max_score: "<< melhor_valor_g << endl << endl;
     final_time = omp_get_wtime() - init_time;
     cout << "tempo: " << final_time << endl;
+
+    // cout << melhor_valor_g;
 
      return 0;
 
