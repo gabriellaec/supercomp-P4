@@ -55,8 +55,6 @@ item smith_waterman_results(vector<string> a, vector<string> b, int n, int m);
 int main() {
     double init_time, final_time;
     init_time = omp_get_wtime();
-    // cout << "oi";
-
 
     long n=0;
     vector<string> a;
@@ -87,8 +85,7 @@ int main() {
     item melhor, sw_atual;    
     vector<combination> combinations;      
     vector<item> resultados, melhores;
-    combination el;
-    resultados.resize(20);
+    resultados.resize(600000);
     for (int indice =0; indice<(int)combinations.size(); indice++){ 
         resultados.push_back({0,a,b});
     }
@@ -98,23 +95,18 @@ int main() {
     int melhor_valor_g = -1;
     for (auto& sub_a : subseqs_a){
         for (auto& sub_b : subseqs_b){
-
             combinations.push_back({i,sub_a, sub_b});
             i+=1;
-            if (i>=600000){
+            if (i>=600000){ // divisão em sub blocos para não estourar o vetor
                 #pragma omp parallel for reduction(max:melhor_valor)
                 for (auto& el : combinations){ 
                     melhor_valor = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
-                }
-                
-                
-                
+                }         
                 for (long i=0; i<(long)resultados.size(); i++){
                     if (melhor_valor > melhor_valor_g){
                         melhor_valor_g = melhor_valor;
                     }
                 }
-                
             // -----------------------------------//
             i = 0;   
             combinations.clear();             
@@ -122,44 +114,25 @@ int main() {
         }
     }
 
-
-            #pragma omp parallel for reduction(max:melhor_valor)
-            for (auto& el : combinations){ 
-                    melhor_valor = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
-            }
-                
-                
-            for (long i=0; i<(long)resultados.size(); i++){
-                if (melhor_valor > melhor_valor_g){
-                    melhor_valor_g = melhor_valor;
-                }
-            }
+// Calculando o score para os valores restantes
+    #pragma omp parallel for reduction(max:melhor_valor)
+    for (auto& el : combinations){ 
+            melhor_valor = smith_waterman_results(el.seq_a, el.seq_b,(el.seq_a).size(),(el.seq_b).size()).item_score;
+    }
+        
+        
+    for (long i=0; i<(long)resultados.size(); i++){
+        if (melhor_valor > melhor_valor_g){
+            melhor_valor_g = melhor_valor;
+        }
+    }
 
 
 // ----- Imprimindo Score obtido ----- //
-    // cout << "----- Score -----" << endl;
-    // cout << "max_score: "<< melhor_valor_g << endl << endl;
-
-    cout << melhor_valor_g;
-
-    // cout << " ----- Melhor subsequência de A -----" << endl;
-    // for (auto& el : melhor.seq_a ){
-    //     cout << el << " ";
-    // }
-    // cout << endl;
-
-    // cout << " ----- Subsequência B correspondente -----" << endl;
-    // for (auto& el : melhor.seq_b){
-    //     cout << el << " ";
-    // }
-    // cout << endl;
-
-
-
-    // final_time = omp_get_wtime() - init_time;
-    // cout << "tempo: " << final_time << endl;
-
-    // cout << melhor.item_score ;
+    cout << "----- Score -----" << endl;
+    cout << "max_score: "<< melhor_valor_g << endl << endl;
+    final_time = omp_get_wtime() - init_time;
+    cout << "tempo: " << final_time << endl;
 
      return 0;
 
